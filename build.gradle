@@ -1,9 +1,13 @@
+import java.lang.System
+
 plugins {
-	id 'java-library'
-	id 'scala'
-	id 'maven-publish'
 	id "me.modmuss50.mod-publish-plugin" version "0.6.3"
 	id 'fabric-loom' version '1.3-SNAPSHOT'
+	id 'java-library'
+	id 'maven-publish'
+	id 'scala'
+	id "com.diffplug.spotless" version "7.0.4"
+	id 'groovy'
 }
 
 sourceCompatibility = JavaVersion.VERSION_17
@@ -11,18 +15,23 @@ targetCompatibility = JavaVersion.VERSION_17
 archivesBaseName = project.archives_base_name
 group = project.maven_group
 
-version = mod_version + "+scala." + project.scala_version
+def detected_scala_version = System.getenv("SCALA3_VERSION")==null ? project.scala_version: System.getenv("SCALA3_VERSION")
+
+version = mod_version + "+scala." + detected_scala_version
+
+
+System.out.println("Building with Scala3: ${detected_scala_version}")
 
 dependencies {
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
 	mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
-	
+
 	compileOnly 'org.projectlombok:lombok:1.18.32'
 	annotationProcessor 'org.projectlombok:lombok:1.18.32'
 
 	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 
-	include(api("org.scala-lang:scala3-library_3:${project.scala_version}"))
+	include(api("org.scala-lang:scala3-library_3:${detected_scala_version}"))
 	include(api("org.scala-lang:scala-library:2.13.12"))
 	include(api("org.typelevel:cats-core_3:2.12.0"))
 	include(api("com.chuusai:shapeless_2.13:2.3.12"))
@@ -42,25 +51,25 @@ java {
 }
 
 jar {
-    from("LICENSE") {
-        rename { "${it}_${project.archivesBaseName}" }
-    }
+	from("LICENSE") {
+		rename { "${it}_${project.archivesBaseName}" }
+	}
 }
 
 tasks.withType(GenerateModuleMetadata).configureEach {
-    enabled = false
+	enabled = false
 }
 
 publishing {
-    publications {
-        mavenJava(MavenPublication) {
-            groupId = project.group
-            artifactId = project.name
-            version = version
-            artifact(tasks.jar)
-            from components.java
-        }
-    }
+	publications {
+		mavenJava(MavenPublication) {
+			groupId = project.group
+			artifactId = project.name
+			version = version
+			artifact(tasks.jar)
+			from components.java
+		}
+	}
 
 	repositories {
 		if (System.getenv('MAVEN_URL')) {
@@ -72,6 +81,24 @@ publishing {
 				}
 			}
 		}
+	}
+}
+
+spotless {
+	groovy {
+		greclipse()
+	}
+
+	groovyGradle {
+		target '*.gradle'
+		greclipse()
+	}
+
+	java {
+		importOrder()
+		removeUnusedImports()
+		eclipse()
+		formatAnnotations()
 	}
 }
 
@@ -88,24 +115,24 @@ task checkVersion {
 }
 
 publishMods {
-    file = remapJar.archiveFile
-    type = STABLE
-    modLoaders.add("fabric")
+	file = remapJar.archiveFile
+	type = STABLE
+	modLoaders.add("fabric")
 	changelog = "no changelogs"
 
-    modrinth {
+	modrinth {
 		minecraftVersionRange {
-            start = "1.17"
-            end = "latest"
-            includeSnapshots = true
-        }
-        projectId = "Ptd0Ha1s"
-        accessToken = providers.environmentVariable("MODRINTH_TOKEN")
-    }
-    github {
-        repository = "Krysztal112233/krysztal-language-scala"
-        accessToken = providers.environmentVariable("GITHUB_TOKEN")
-        commitish = "krysztal"
+			start = "1.17"
+			end = "latest"
+			includeSnapshots = true
+		}
+		projectId = "Ptd0Ha1s"
+		accessToken = providers.environmentVariable("MODRINTH_TOKEN")
+	}
+	github {
+		repository = "Krysztal112233/krysztal-language-scala"
+		accessToken = providers.environmentVariable("GITHUB_TOKEN")
+		commitish = "krysztal"
 		tagName = version
-    }
+	}
 }
