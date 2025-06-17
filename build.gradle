@@ -114,7 +114,6 @@ publishMods {
 	file = remapJar.archiveFile
 	type = STABLE
 	modLoaders.add("fabric")
-	changelog = "no changelogs"
 
 	modrinth {
 		minecraftVersionRange {
@@ -125,10 +124,20 @@ publishMods {
 		projectId = "Ptd0Ha1s"
 		accessToken = providers.environmentVariable("MODRINTH_TOKEN")
 	}
+
 	github {
 		repository = "Krysztal112233/krysztal-language-scala"
 		accessToken = providers.environmentVariable("GITHUB_TOKEN")
 		commitish = "krysztal"
 		tagName = version
+	}
+
+	curseforge {
+		projectId = "999484"
+		accessToken = providers.environmentVariable("CURSEFORGE_TOKEN")
+		minecraftVersionRange {
+			start = "1.17"
+			end = "latest"
+		}
 	}
 }
