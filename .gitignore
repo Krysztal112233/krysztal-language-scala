@@ -18,3 +18,5 @@
 !/README.md
 !.github
 !.scalafmt.conf
+!supported.json
+!publish.sh

@@ -1,0 +1,60 @@
+name: Publish
+
+on: [push]
+
+jobs:
+  prepare-matrix:
+    name: Prepare version matrix
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: 'gradle'
+
+      - name: Pre-build
+        run: ./gradlew build
+
+      - name: Extract versions from `supported.json`
+        id: set-matrix
+        run: |
+          versions=$(jq -c '.[] | {version: .}' supported.json | jq -s .)
+          matrix=$(jq -n --argjson v "$versions" '{"include": $v}' | jq -c .)
+          echo "matrix=$matrix" >> $GITHUB_OUTPUT
+          echo "Generated matrix:"
+          echo "$matrix"
+
+  publish:
+    name: Publish version ${{ matrix.version }}
+    needs: prepare-matrix
+    runs-on: ubuntu-latest
+    strategy:
+      matrix: ${{ fromJson(needs.prepare-matrix.outputs.matrix) }}
+      max-parallel: 4
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: 'gradle'
+          
+      - name: Publish for Scala ${{ matrix.version }}
+        run: SCALA3_VERSION=${{ matrix.version }} ./gradlew publish publishMods --stacktrace
+        env:
+          MAVEN_URL: ${{ secrets.MAVEN_URL }}
+          MAVEN_USERNAME: ${{ secrets.MAVEN_USERNAME }}
+          MAVEN_PASSWORD: ${{ secrets.MAVEN_PASSWORD }}
+          CURSEFORGE_TOKEN: ${{ secrets.CURSEFORGE_TOKEN }}
+          MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
