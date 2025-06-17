@@ -32,10 +32,6 @@ dependencies {
 	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 
 	include(api("org.scala-lang:scala3-library_3:${detected_scala_version}"))
-	include(api("org.scala-lang:scala-library:2.13.12"))
-	include(api("org.typelevel:cats-core_3:2.12.0"))
-	include(api("com.chuusai:shapeless_2.13:2.3.12"))
-	include(api("org.typelevel:mouse_3:1.3.1"))
 }
 
 processResources {

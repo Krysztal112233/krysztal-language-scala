@@ -18,14 +18,6 @@ So I decided to fork it and maintain it myself and implement it to be compatible
 
 - This language adaptor will synchronize content upstream as much as possible and will ensure availability as much as possible.
 
-## Bundled libraries
-
-From a number of perspectives, the library needs to bind some popular scala libraries.
-
-- `org.typelevel:cats-core_3:2.12.0`
-- `com.chuusai:shapeless_2.13:2.3.12`
-- `org.typelevel:mouse_3:1.3.1`
-
 ## How to use?
 
 ### Add dependence
