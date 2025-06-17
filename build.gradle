@@ -114,6 +114,7 @@ publishMods {
 	file = remapJar.archiveFile
 	type = STABLE
 	modLoaders.add("fabric")
+	changelog= "Build with Scala3: ${detected_scala_version}"
 
 	modrinth {
 		minecraftVersionRange {
