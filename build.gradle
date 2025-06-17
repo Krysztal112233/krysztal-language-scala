@@ -1,7 +1,7 @@
 import java.lang.System
 
 plugins {
-	id "me.modmuss50.mod-publish-plugin" version "0.6.3"
+	id "me.modmuss50.mod-publish-plugin" version "0.8.4"
 	id 'fabric-loom' version '1.3-SNAPSHOT'
 	id 'java-library'
 	id 'maven-publish'
@@ -114,6 +114,7 @@ publishMods {
 	file = remapJar.archiveFile
 	type = STABLE
 	modLoaders.add("fabric")
+	changelog= "Build with Scala3: ${detected_scala_version}"
 
 	modrinth {
 		minecraftVersionRange {
