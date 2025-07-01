@@ -2,6 +2,8 @@
 
 ![Modrinth Version](https://img.shields.io/modrinth/v/Ptd0Ha1s?style=flat&logo=modrinth&labelColor=green)
 
+<a href="./docs/README_zhcn.md">中文简体</a>
+
 This is a fork of fabric-language-scala, support the newest Scala3 version and bundled Scala Library.
 
 ## Why fork?
