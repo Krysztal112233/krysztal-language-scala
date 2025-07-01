@@ -2,17 +2,19 @@
 
 ![Modrinth 版本](https://img.shields.io/modrinth/v/Ptd0Ha1s?style=flat&logo=modrinth&labelColor=green)
 
-这是 fabric-language-scala 的 Fork，支持了最新的 Scala3 版本和捆绑的 Scala 库。
+这是 fabric-language-scala 的 Fork，支持了最新的 Scala3 版本。
 
 ## 为啥要 Fork?
 
 使用 Scala 开发的人数特别少，但是 Scala 的表现十分适合用于开发 Mod。
 
-最初的 'fabric-language-scala' 没有得到维护，维护者无法再花更多的精力来维护它，所以它慢慢地变得少人维护并且没有功能。
+最初的 `fabric-language-scala`
+没有得到维护，维护者无法再花更多的精力来维护它，所以它慢慢地变得少人维护并且没有功能。
 
 对于 Scala 3 的支持，即便有，也几乎等于不存在。
 
-于是，我决定自己 Fork 这个项目并进行维护，同时将其实现为兼容原版 `fabric-language-scala` 的版本，命名为 `krysztal-language-scala`。
+于是，我决定自己 Fork 这个项目并进行维护，同时将其实现为兼容原版
+`fabric-language-scala` 的版本，命名为 `krysztal-language-scala`。
 
 ## 注意
 
@@ -25,7 +27,6 @@
 添加这些到你项目的 `build.gradle` 文件。
 
 ```groovy
-
 plugins {
   ...
 	id 'scala' // 为 Gradle 添加 Scala 插件
@@ -45,7 +46,7 @@ dependencies {
 }
 ```
 
-### 用途: `Class`
+### 用途: `class`
 
 假设你的入口文件名为 `ExampleEntry.scala`
 
@@ -63,18 +64,18 @@ class ExampleEntry extends ModInitializer {
 在 `fabric.mod.json` 添加
 
 ```json
-    ...
- "entrypoints": {
-    "main": [
-      "dev.example.ExampleEntry"
-    ],
-  },
-    ...
+   ...
+"entrypoints": {
+   "main": [
+     "dev.example.ExampleEntry"
+   ],
+ },
+   ...
 ```
 
 得益于 Scala 与 Java 出色的互操作性，我们可以直接将该库作为 Java 入口点来使用 :)
 
-### 用途: `对象`
+### 用途: `object`
 
 假设你的入口文件名为 `ExampleEntry.scala`
 
@@ -88,19 +89,20 @@ object ExampleEntry extends ModInitializer {
     }
 }
 ```
+
 在 `fabric.mod.json` 中添加
 
 ```json
-    ...
- "entrypoints": {
-    "main": [
-      {
-        "adapter": "scala",
-        "value": "dev.example.ExampleEntry"
-      }
-    ],
-  },
-    ...
+   ...
+"entrypoints": {
+   "main": [
+     {
+       "adapter": "scala",
+       "value": "dev.example.ExampleEntry"
+     }
+   ],
+ },
+   ...
 ```
 
 ## 已知问题

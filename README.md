@@ -4,21 +4,26 @@
 
 <a href="./docs/README_zhcn.md">中文简体</a>
 
-This is a fork of fabric-language-scala, support the newest Scala3 version and bundled Scala Library.
+This is a fork of fabric-language-scala, support the newest Scala3 version.
 
 ## Why fork?
 
-The number of people who use Scala is very small, but the power of Scala's expressiveness makes the language practically perfect for developing mods.
+The number of people who use Scala is very small, but the power of Scala's
+expressiveness makes the language practically perfect for developing mods.
 
-The original `fabric-language-scala` was unmaintained and the maintainers couldn't spare any more effort to maintain it, so it slowly became unmaintained and non-functional.
+The original `fabric-language-scala` was unmaintained and the maintainers
+couldn't spare any more effort to maintain it, so it slowly became unmaintained
+and non-functional.
 
 Support for Scala3 is, if anything, almost non-existent.
 
-So I decided to fork it and maintain it myself and implement it to be compatible with the original `fabric-language-scala`,named `krysztal-language-scala`.
+So I decided to fork it and maintain it myself and implement it to be compatible
+with the original `fabric-language-scala`,named `krysztal-language-scala`.
 
 ## NOTE
 
-- This language adaptor will synchronize content upstream as much as possible and will ensure availability as much as possible.
+- This language adaptor will synchronize content upstream as much as possible
+  and will ensure availability as much as possible.
 
 ## How to use?
 
@@ -27,7 +32,6 @@ So I decided to fork it and maintain it myself and implement it to be compatible
 Add those lines to your project's `build.gradle`
 
 ```groovy
-
 plugins {
   ...
 	id 'scala' // Add `scala` plugin for gradle
@@ -65,16 +69,17 @@ class ExampleEntry extends ModInitializer {
 And in `fabric.mod.json`
 
 ```json
-    ...
- "entrypoints": {
-    "main": [
-      "dev.example.ExampleEntry"
-    ],
-  },
-    ...
+   ...
+"entrypoints": {
+   "main": [
+     "dev.example.ExampleEntry"
+   ],
+ },
+   ...
 ```
 
-But thanks to Scala's excellent interoperability with Java, we can use this library simply as a Java entry point :)
+But thanks to Scala's excellent interoperability with Java, we can use this
+library simply as a Java entry point :)
 
 ### Usage: `object`
 
@@ -94,16 +99,16 @@ object ExampleEntry extends ModInitializer {
 And in `fabric.mod.json`
 
 ```json
-    ...
- "entrypoints": {
-    "main": [
-      {
-        "adapter": "scala",
-        "value": "dev.example.ExampleEntry"
-      }
-    ],
-  },
-    ...
+   ...
+"entrypoints": {
+   "main": [
+     {
+       "adapter": "scala",
+       "value": "dev.example.ExampleEntry"
+     }
+   ],
+ },
+   ...
 ```
 
 ## Known issues
