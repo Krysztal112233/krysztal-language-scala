@@ -8,22 +8,22 @@ This is a fork of fabric-language-scala, support the newest Scala3 version.
 
 ## Why fork?
 
-The number of people who use Scala is very small, but the power of Scala's
-expressiveness makes the language practically perfect for developing mods.
+The number of people who use Scala is very small, but the power of Scala's expressiveness makes the language practically perfect for developing mods.
 
-The original `fabric-language-scala` was unmaintained and the maintainers
-couldn't spare any more effort to maintain it, so it slowly became unmaintained
-and non-functional.
+The original `fabric-language-scala` was unmaintained and the maintainers couldn't spare any more effort to maintain it, so it slowly became unmaintained and non-functional.
 
 Support for Scala3 is, if anything, almost non-existent.
 
-So I decided to fork it and maintain it myself and implement it to be compatible
-with the original `fabric-language-scala`,named `krysztal-language-scala`.
+So I decided to fork it and maintain it myself and implement it to be compatible with the original `fabric-language-scala`,named `krysztal-language-scala`.
 
 ## NOTE
 
-- This language adaptor will synchronize content upstream as much as possible
-  and will ensure availability as much as possible.
+- This language adapter will synchronize content upstream as much as possible and will ensure availability as much as possible.
+- If you are **DEVELOPER**, please reading [FOR_DEVELOPER](./docs/FOR_DEVELOPER.md), and remind your user which Scala3 version you used
+  - I suggested you should using the newest version as possible
+- If you are **USER**, please reading [FOR_USER](./docs/FOR_USER.md)
+
+From KLS `3.3.2`, I set the compile target of `javac` to Java17, it means you should using at least 1.18
 
 ## How to use?
 
