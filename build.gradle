@@ -1,8 +1,8 @@
 import java.lang.System
 
 plugins {
-	id "me.modmuss50.mod-publish-plugin" version "0.8.4"
-	id 'fabric-loom' version '1.3-SNAPSHOT'
+	id "me.modmuss50.mod-publish-plugin" version "1.1.0"
+	id 'fabric-loom' version "${loom_version}"
 	id 'java-library'
 	id 'maven-publish'
 	id 'scala'
@@ -10,15 +10,13 @@ plugins {
 	id 'groovy'
 }
 
-sourceCompatibility = JavaVersion.VERSION_17
-targetCompatibility = JavaVersion.VERSION_17
-archivesBaseName = project.archives_base_name
+base {
+	archivesName = project.archives_base_name
+}
+
 group = project.maven_group
-
 def detected_scala_version = System.getenv("SCALA3_VERSION")==null ? project.scala_version: System.getenv("SCALA3_VERSION")
-
 version = mod_version + "+scala." + detected_scala_version
-
 
 System.out.println("Building with Scala3: ${detected_scala_version}")
 
@@ -43,13 +41,22 @@ processResources {
 	}
 }
 
+tasks.withType(JavaCompile).configureEach {
+	it.options.release = 21
+}
+
 java {
 	withSourcesJar()
+
+	sourceCompatibility = JavaVersion.VERSION_21
+	targetCompatibility = JavaVersion.VERSION_21
 }
 
 jar {
+	inputs.property "archivesName", project.base.archivesName
+
 	from("LICENSE") {
-		rename { "${it}_${project.archivesBaseName}" }
+		rename { "${it}_${inputs.properties.archivesName}"}
 	}
 }
 
@@ -99,18 +106,6 @@ spotless {
 	}
 }
 
-// A task to ensure that the version being released has not already been released.
-task checkVersion {
-	doFirst {
-		def xml = new URL("https://maven.fabricmc.net/net/fabricmc/fabric-language-scala/maven-metadata.xml").text
-		def metadata = new XmlSlurper().parseText(xml)
-		def versions = metadata.versioning.versions.version*.text();
-		if (versions.contains(version)) {
-			throw new RuntimeException("${version} has already been released!")
-		}
-	}
-}
-
 publishMods {
 	file = remapJar.archiveFile
 	type = STABLE
@@ -119,7 +114,7 @@ publishMods {
 
 	modrinth {
 		minecraftVersionRange {
-			start = "1.17"
+			start = "1.21"
 			end = "latest"
 			includeSnapshots = true
 		}

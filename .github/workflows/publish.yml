@@ -15,9 +15,9 @@ jobs:
       - name: Set up JDK
         uses: actions/setup-java@v4
         with:
-          java-version: '17'
-          distribution: 'temurin'
-          cache: 'gradle'
+          java-version: "21"
+          distribution: "temurin"
+          cache: "gradle"
 
       - name: Pre-build
         run: ./gradlew build
@@ -41,14 +41,14 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        
+
       - name: Set up JDK
         uses: actions/setup-java@v4
         with:
-          java-version: '17'
-          distribution: 'temurin'
-          cache: 'gradle'
-          
+          java-version: "21"
+          distribution: "temurin"
+          cache: "gradle"
+
       - name: Publish for Scala ${{ matrix.version }}
         run: SCALA3_VERSION=${{ matrix.version }} ./gradlew publish publishMods --stacktrace
         env:
