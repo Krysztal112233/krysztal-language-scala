@@ -40,13 +40,14 @@ plugins {
 
 repositories {
   ...
-	maven { url "https://maven.krysztal.dev/releases" }
+	maven { url "https://api.modrinth.com/maven" }
   ...
 }
 
 dependencies {
   ...
-	implementation "dev.krysztal:krysztal-language-scala:${project.kls_version}+scala.${project.scala_version}"
+	// Scala 3 language support (Fabric language adapter + Scala runtime, bundled at runtime by this mod).
+	implementation("maven.modrinth:krysztal-language-scala:${property("krysztal_scala_version")}")
   ...
 }
 ```

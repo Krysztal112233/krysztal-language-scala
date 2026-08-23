@@ -4,7 +4,6 @@ plugins {
 	id "me.modmuss50.mod-publish-plugin" version "1.1.0"
 	id 'net.fabricmc.fabric-loom' version "${loom_version}"
 	id 'java-library'
-	id 'maven-publish'
 	id 'scala'
 	id "com.diffplug.spotless" version "7.0.4"
 	id 'groovy'
@@ -14,7 +13,6 @@ base {
 	archivesName = project.archives_base_name
 }
 
-group = project.maven_group
 def detected_scala_version = System.getenv("SCALA3_VERSION")==null ? project.scala_version: System.getenv("SCALA3_VERSION")
 def scala_standard_library_version = detected_scala_version.tokenize('.')[1].toInteger() >= 8 ? detected_scala_version : "2.13.12"
 version = mod_version + "+scala." + detected_scala_version
@@ -57,34 +55,6 @@ jar {
 
 	from("LICENSE") {
 		rename { "${it}_${inputs.properties.archivesName}"}
-	}
-}
-
-tasks.withType(GenerateModuleMetadata).configureEach {
-	enabled = false
-}
-
-publishing {
-	publications {
-		mavenJava(MavenPublication) {
-			groupId = project.group
-			artifactId = project.name
-			version = version
-			artifact(tasks.jar)
-			from components.java
-		}
-	}
-
-	repositories {
-		if (System.getenv('MAVEN_URL')) {
-			maven {
-				url System.getenv('MAVEN_URL')
-				credentials {
-					username System.getenv('MAVEN_USERNAME')
-					password System.getenv('MAVEN_PASSWORD')
-				}
-			}
-		}
 	}
 }
 
