@@ -16,5 +16,8 @@
   "icon": "assets/icon.png",
   "conflicts": {
     "fabric-language-scala": "*"
+  },
+  "depends": {
+    "java": ">=25"
   }
 }

@@ -23,7 +23,7 @@ So I decided to fork it and maintain it myself and implement it to be compatible
   - I suggested you should using the newest version as possible
 - If you are **USER**, please reading [FOR_USER](./docs/FOR_USER.md)
 
-From KLS `3.3.2`, I set the compile target of `javac` to Java17, it means you should using at least 1.18
+From KLS `3.3.2`, the compile target is Java 25. Older Java runtimes are not supported.
 
 ## How to use?
 
@@ -46,7 +46,7 @@ repositories {
 
 dependencies {
   ...
-	modImplementation "dev.krysztal:krysztal-language-scala:${project.kls_version}+scala.${project.scala_version}"
+	implementation "dev.krysztal:krysztal-language-scala:${project.kls_version}+scala.${project.scala_version}"
   ...
 }
 ```

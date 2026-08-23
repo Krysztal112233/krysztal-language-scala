@@ -2,7 +2,7 @@ import java.lang.System
 
 plugins {
 	id "me.modmuss50.mod-publish-plugin" version "1.1.0"
-	id 'fabric-loom' version "${loom_version}"
+	id 'net.fabricmc.fabric-loom' version "${loom_version}"
 	id 'java-library'
 	id 'maven-publish'
 	id 'scala'
@@ -16,21 +16,21 @@ base {
 
 group = project.maven_group
 def detected_scala_version = System.getenv("SCALA3_VERSION")==null ? project.scala_version: System.getenv("SCALA3_VERSION")
+def scala_standard_library_version = detected_scala_version.tokenize('.')[1].toInteger() >= 8 ? detected_scala_version : "2.13.12"
 version = mod_version + "+scala." + detected_scala_version
 
 System.out.println("Building with Scala3: ${detected_scala_version}")
 
 dependencies {
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
-	mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
 
-	compileOnly 'org.projectlombok:lombok:1.18.32'
-	annotationProcessor 'org.projectlombok:lombok:1.18.32'
+	compileOnly 'org.projectlombok:lombok:1.18.46'
+	annotationProcessor 'org.projectlombok:lombok:1.18.46'
 
-	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+	implementation "net.fabricmc:fabric-loader:${project.loader_version}"
 
 	include(api("org.scala-lang:scala3-library_3:${detected_scala_version}"))
-	include(api("org.scala-lang:scala-library:2.13.12"))
+	include(api("org.scala-lang:scala-library:${scala_standard_library_version}"))
 }
 
 processResources {
@@ -42,14 +42,14 @@ processResources {
 }
 
 tasks.withType(JavaCompile).configureEach {
-	it.options.release = 17
+	it.options.release = 25
 }
 
 java {
 	withSourcesJar()
 
-	sourceCompatibility = JavaVersion.VERSION_17
-	targetCompatibility = JavaVersion.VERSION_17
+	sourceCompatibility = JavaVersion.VERSION_25
+	targetCompatibility = JavaVersion.VERSION_25
 }
 
 jar {
@@ -107,14 +107,14 @@ spotless {
 }
 
 publishMods {
-	file = remapJar.archiveFile
+	file = jar.archiveFile
 	type = STABLE
 	modLoaders.add("fabric")
 	changelog= "Build with Scala3: ${detected_scala_version}"
 
 	modrinth {
 		minecraftVersionRange {
-			start = "1.21"
+			start = "26.1"
 			end = "latest"
 			includeSnapshots = true
 		}
