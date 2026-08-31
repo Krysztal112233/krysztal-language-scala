@@ -1,8 +1,8 @@
 # Krysztal 的 fabric-language-scala Fork
 
-![Modrinth 版本](https://img.shields.io/modrinth/v/Ptd0Ha1s?style=flat&logo=modrinth&labelColor=green)
+[![Modrinth 版本](https://img.shields.io/modrinth/v/Ptd0Ha1s?style=flat&logo=modrinth&labelColor=green)](https://modrinth.com/mod/Ptd0Ha1s)
 
-这是 fabric-language-scala 的 Fork，支持了最新的 Scala3 版本。
+这是 fabric-language-scala 的 Fork，提供对最新稳定版 Scala 3 的支持。
 
 ## 为啥要 Fork?
 
@@ -19,6 +19,9 @@
 ## 注意
 
 - 该语言适配器将尽可能同步上游内容，并全力确保其可用性。
+- 开发者请阅读 [FOR_DEVELOPER](./FOR_DEVELOPER.md)（英文）。
+- 玩家请阅读 [FOR_USER](./FOR_USER.md)（英文），并安装适用于其 Minecraft 版本的最新 KLS 文件，无需选择不同的 Scala 版本。
+- KLS 跟随最新稳定版 Scala 3，并内置与其匹配的运行时。当前玩家兼容要求请查看 [FOR_USER](./FOR_USER.md)（英文），准确依赖坐标请查看 [FOR_DEVELOPER](./FOR_DEVELOPER.md)（英文）。
 
 ## 咋用啊?
 
@@ -36,16 +39,25 @@ plugins {
 repositories {
   ...
 	maven { url "https://api.modrinth.com/maven" }
+	mavenCentral()
   ...
 }
 
 dependencies {
   ...
-	// Scala 3 语言支持（Fabric 语言适配器及 Scala 运行时；运行时由此模组捆绑）。
-	implementation("maven.modrinth:krysztal-language-scala:${property("krysztal_scala_version")}")
+	modImplementation("maven.modrinth:krysztal-language-scala:${property("kls_version")}")
+
+	// 开发时必须显式添加。Modrinth 生成的 Maven POM 不会公开玩家 JAR
+	// 中嵌套的 Scala 依赖。
+	implementation("org.scala-lang:scala3-library_3:${property("scala_version")}")
+	implementation("org.scala-lang:scala-library:${property("scala_version")}")
   ...
 }
 ```
+
+请在 `gradle.properties` 中把 `kls_version` 和 `scala_version` 设置为最新 KLS 发布页列出的值，并让 Scala 编译器版本与该发布内置的运行时保持一致。下载的玩家 JAR 已包含运行时；上面显式声明的 Scala 依赖用于为开发环境提供匹配的编译器和编译期 API。
+
+模组的 `fabric.mod.json` 还应在 `depends` 中声明 KLS，并根据模组需求设置合适的最低发布版本。Fabric 在判断版本范围时会忽略 `+scala.*` 构建元数据。当前坐标及兼容性细节请查看 [FOR_DEVELOPER](./FOR_DEVELOPER.md)（英文）。
 
 ### 用途: `class`
 

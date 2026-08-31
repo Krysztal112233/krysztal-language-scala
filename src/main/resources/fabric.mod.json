@@ -18,6 +18,7 @@
     "fabric-language-scala": "*"
   },
   "depends": {
-    "java": ">=25"
+    "minecraft": ">=1.18",
+    "java": ">=17"
   }
 }

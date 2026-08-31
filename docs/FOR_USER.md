@@ -1,18 +1,5 @@
 # FOR USER
 
-As you see, you can find many version of Scala and Minecraft support.
+Install the latest KLS file for your Minecraft version from [Modrinth](https://modrinth.com/mod/Ptd0Ha1s). Starting with KLS `3.5.0+scala.3.8.4`, one file supports Minecraft 1.18 and later and bundles the single supported Scala 3.8.4 runtime. There are no Scala-version variants to compare or select.
 
-I suggest that you always download the highest version of Scala for your target Minecraft version.
-
-For example, maybe you can see below KLS version:
-
-- 3.3.1+scala.3.4.1
-- 3.3.1+scala.3.4.0
-- 3.3.1+scala.3.3.7
-- 3.3.1+scala.3.3.6
-- 3.3.1+scala.3.3.5
-- 3.3.1+scala.3.3.4
-- 3.3.1+scala.3.3.3
-- 3.3.1+scala.3.3.1
-
-And you should choose `3.3.1+scala.3.4.1`
+KLS requires Java 17 or later. Your Minecraft version or modpack may require a newer Java release; use the newer requirement when they differ.

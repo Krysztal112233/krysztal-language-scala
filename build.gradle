@@ -1,23 +1,25 @@
-import java.lang.System
-
 plugins {
 	id "me.modmuss50.mod-publish-plugin" version "1.1.0"
 	id 'net.fabricmc.fabric-loom' version "${loom_version}"
 	id 'java-library'
+	id 'maven-publish'
 	id 'scala'
 	id "com.diffplug.spotless" version "7.0.4"
-	id 'groovy'
 }
 
 base {
 	archivesName = project.archives_base_name
 }
 
-def detected_scala_version = System.getenv("SCALA3_VERSION")==null ? project.scala_version: System.getenv("SCALA3_VERSION")
-def scala_standard_library_version = detected_scala_version.tokenize('.')[1].toInteger() >= 8 ? detected_scala_version : "2.13.12"
-version = mod_version + "+scala." + detected_scala_version
+group = "io.github.krysztal112233"
+version = "${mod_version}+scala.${scala_version}"
 
-System.out.println("Building with Scala3: ${detected_scala_version}")
+def distributionGroup = group.toString()
+def distributionArtifactId = archives_base_name.toString()
+def distributionVersion = version.toString()
+def runtimeScalaVersion = scala_version.toString()
+
+System.out.println("Building with Scala 3: ${scala_version}")
 
 dependencies {
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
@@ -26,28 +28,38 @@ dependencies {
 	annotationProcessor 'org.projectlombok:lombok:1.18.46'
 
 	implementation "net.fabricmc:fabric-loader:${project.loader_version}"
+	testImplementation 'org.junit.jupiter:junit-jupiter:5.11.4'
+	testRuntimeOnly 'org.junit.platform:junit-platform-launcher:1.11.4'
 
-	include(api("org.scala-lang:scala3-library_3:${detected_scala_version}"))
-	include(api("org.scala-lang:scala-library:${scala_standard_library_version}"))
+	include(api("org.scala-lang:scala3-library_3:${scala_version}"))
+	include(api("org.scala-lang:scala-library:${scala_version}"))
 }
 
 processResources {
-	inputs.property "version", project.version
+	inputs.property "version", distributionVersion
 
 	filesMatching("fabric.mod.json") {
-		expand "version": project.version
+		expand "version": distributionVersion
 	}
 }
 
 tasks.withType(JavaCompile).configureEach {
-	it.options.release = 25
+	it.options.release = 17
+}
+
+tasks.withType(ScalaCompile).configureEach {
+	scalaCompileOptions.additionalParameters.add("-release:17")
 }
 
 java {
 	withSourcesJar()
 
-	sourceCompatibility = JavaVersion.VERSION_25
-	targetCompatibility = JavaVersion.VERSION_25
+	sourceCompatibility = JavaVersion.VERSION_17
+	targetCompatibility = JavaVersion.VERSION_17
+}
+
+scala {
+	scalaVersion = project.scala_version
 }
 
 jar {
@@ -58,9 +70,119 @@ jar {
 	}
 }
 
+publishing {
+	publications {
+		mavenJava(MavenPublication) {
+			from components.java
+			artifactId = project.archives_base_name
+		}
+	}
+}
+
+def verifyClassMajorVersion = { byte[] header, String className ->
+	if (header.length < 8) {
+		throw new GradleException("${className} has an incomplete class header")
+	}
+	if ((header[0] & 0xff) != 0xca || (header[1] & 0xff) != 0xfe || (header[2] & 0xff) != 0xba || (header[3] & 0xff) != 0xbe) {
+		throw new GradleException("${className} does not have a valid class-file header")
+	}
+
+	def majorVersion = ((header[6] & 0xff) << 8) | (header[7] & 0xff)
+	if (majorVersion != 61) {
+		throw new GradleException("${className} targets class version ${majorVersion}, expected 61 (Java 17)")
+	}
+}
+
+def verifyDistribution = tasks.register("verifyDistribution") {
+	group = "verification"
+	description = "Verifies the Java/Minecraft targets, bundled Scala runtime, metadata, and Maven POM"
+	dependsOn tasks.jar
+	dependsOn tasks.generatePomFileForMavenJavaPublication
+
+	doLast {
+		def expectedScalaJars = [
+			"META-INF/jars/scala-library-${runtimeScalaVersion}.jar",
+			"META-INF/jars/scala3-library_3-${runtimeScalaVersion}.jar"
+		] as Set
+		def outputJar = tasks.jar.archiveFile.get().asFile
+
+		new java.util.zip.ZipFile(outputJar).withCloseable { zip ->
+			def adapterEntry = zip.getEntry("net/fabricmc/language/scala/ScalaLanguageAdapter.class")
+			if (adapterEntry == null) {
+				throw new GradleException("ScalaLanguageAdapter.class is missing from ${outputJar.name}")
+			}
+			zip.getInputStream(adapterEntry).withCloseable { input ->
+				verifyClassMajorVersion(input.readNBytes(8), adapterEntry.name)
+			}
+
+			def metadata = zip.getInputStream(zip.getEntry("fabric.mod.json")).withCloseable { input ->
+				new groovy.json.JsonSlurper().parse(input)
+			}
+			def metadataScalaJars = metadata.jars.collect { it.file } as Set
+			if (metadata.version != distributionVersion || metadata.depends.java != ">=17" || metadata.depends.minecraft != ">=1.18" || metadataScalaJars != expectedScalaJars) {
+				throw new GradleException("fabric.mod.json does not describe version ${distributionVersion}, Minecraft 1.18, Java 17, and the expected Scala runtime")
+			}
+
+			def bundledJars = zip.entries().findAll {
+				!it.directory && it.name.startsWith("META-INF/jars/") && it.name.endsWith(".jar")
+			}*.name as Set
+			if (bundledJars != expectedScalaJars) {
+				throw new GradleException("Expected exactly the bundled Scala JARs ${expectedScalaJars}, found ${bundledJars}")
+			}
+
+			expectedScalaJars.each { nestedJarName ->
+				def nestedJarBytes = zip.getInputStream(zip.getEntry(nestedJarName)).withCloseable { it.bytes }
+				new java.util.jar.JarInputStream(new ByteArrayInputStream(nestedJarBytes)).withCloseable { nestedJar ->
+					def nestedVersion = nestedJar.manifest.mainAttributes.getValue("Implementation-Version")
+					if (nestedVersion != runtimeScalaVersion) {
+						throw new GradleException("${nestedJarName} reports runtime version ${nestedVersion}, expected ${runtimeScalaVersion}")
+					}
+
+					if (nestedJarName.startsWith("META-INF/jars/scala-library-")) {
+						def entry
+						while ((entry = nestedJar.nextJarEntry) != null && entry.name != "scala/App.class") {
+							// Find one runtime class to verify the bundled library's Java floor.
+						}
+						if (entry == null) {
+							throw new GradleException("scala/App.class is missing from ${nestedJarName}")
+						}
+						verifyClassMajorVersion(nestedJar.readNBytes(8), "${nestedJarName}!/${entry.name}")
+					}
+				}
+			}
+		}
+
+		def pom = new groovy.xml.XmlSlurper().parse(layout.buildDirectory.file("publications/mavenJava/pom-default.xml").get().asFile)
+		def pomCoordinates = "${pom.groupId}:${pom.artifactId}:${pom.version}"
+		if (pomCoordinates != "${distributionGroup}:${distributionArtifactId}:${distributionVersion}") {
+			throw new GradleException("Unexpected Maven publication coordinates: ${pomCoordinates}")
+		}
+
+		def pomDependencies = pom.dependencies.dependency.collect {
+			"${it.groupId}:${it.artifactId}:${it.version}:${it.scope}"
+		} as Set
+		def expectedPomDependencies = [
+			"org.scala-lang:scala3-library_3:${runtimeScalaVersion}:compile",
+			"org.scala-lang:scala-library:${runtimeScalaVersion}:compile"
+		] as Set
+		def scalaPomDependencies = pomDependencies.findAll { it.startsWith("org.scala-lang:") } as Set
+		if (scalaPomDependencies != expectedPomDependencies) {
+			throw new GradleException("Maven POM does not expose exactly the expected Scala dependencies: ${pomDependencies}")
+		}
+	}
+}
+
+tasks.check {
+	dependsOn verifyDistribution
+}
+
+tasks.test {
+	useJUnitPlatform()
+}
+
 spotless {
-	groovy {
-		greclipse()
+	scala {
+		scalafmt('3.7.15').configFile('.scalafmt.conf')
 	}
 
 	groovyGradle {
@@ -80,11 +202,11 @@ publishMods {
 	file = jar.archiveFile
 	type = STABLE
 	modLoaders.add("fabric")
-	changelog= "Build with Scala3: ${detected_scala_version}"
+	changelog= "Bundled Scala runtime: ${scala_version}"
 
 	modrinth {
 		minecraftVersionRange {
-			start = "26.1"
+			start = "1.18"
 			end = "latest"
 			includeSnapshots = true
 		}
@@ -103,7 +225,7 @@ publishMods {
 	// 	projectId = "999484"
 	// 	accessToken = providers.environmentVariable("CURSEFORGE_TOKEN")
 	// 	minecraftVersionRange {
-	// 		start = "1.17"
+	// 		start = "1.18"
 	// 		end = "latest"
 	// 	}
 	// }

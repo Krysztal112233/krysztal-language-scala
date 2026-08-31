@@ -1,10 +1,10 @@
 # Krysztal's fork of fabric-language-scala
 
-![Modrinth Version](https://img.shields.io/modrinth/v/Ptd0Ha1s?style=flat&logo=modrinth&labelColor=green)
+[![Modrinth Version](https://img.shields.io/modrinth/v/Ptd0Ha1s?style=flat&logo=modrinth&labelColor=green)](https://modrinth.com/mod/Ptd0Ha1s)
 
 <a href="./docs/README_zhcn.md">中文简体</a>
 
-This is a fork of fabric-language-scala, support the newest Scala3 version.
+This is a fork of fabric-language-scala that provides support for the latest stable Scala 3 release.
 
 ## Why fork?
 
@@ -19,15 +19,14 @@ So I decided to fork it and maintain it myself and implement it to be compatible
 ## NOTE
 
 - This language adapter will synchronize content upstream as much as possible and will ensure availability as much as possible.
-- If you are **DEVELOPER**, please reading [FOR_DEVELOPER](./docs/FOR_DEVELOPER.md), and remind your user which Scala3 version you used
-  - I suggested you should using the newest version as possible
-- If you are **USER**, please reading [FOR_USER](./docs/FOR_USER.md)
+- If you are a **DEVELOPER**, read [FOR_DEVELOPER](./docs/FOR_DEVELOPER.md).
+- If you are a **USER**, read [FOR_USER](./docs/FOR_USER.md) and install the latest KLS file. There are no Scala-specific variants to choose from.
 
-From KLS `3.3.2`, the compile target is Java 25. Older Java runtimes are not supported.
+KLS follows the latest stable Scala 3 release and bundles its matching runtime. See [FOR_USER](./docs/FOR_USER.md) for current player compatibility requirements and [FOR_DEVELOPER](./docs/FOR_DEVELOPER.md) for exact dependency coordinates.
 
 ## How to use?
 
-### Add dependence
+### Add dependencies
 
 Add those lines to your project's `build.gradle`
 
@@ -41,16 +40,25 @@ plugins {
 repositories {
   ...
 	maven { url "https://api.modrinth.com/maven" }
+	mavenCentral()
   ...
 }
 
 dependencies {
   ...
-	// Scala 3 language support (Fabric language adapter + Scala runtime, bundled at runtime by this mod).
-	implementation("maven.modrinth:krysztal-language-scala:${property("krysztal_scala_version")}")
+	modImplementation("maven.modrinth:krysztal-language-scala:${property("kls_version")}")
+
+	// Required on the developer compile classpath. Modrinth's generated Maven POM does not
+	// expose the Scala dependencies nested in the player JAR.
+	implementation("org.scala-lang:scala3-library_3:${property("scala_version")}")
+	implementation("org.scala-lang:scala-library:${property("scala_version")}")
   ...
 }
 ```
+
+Set `kls_version` and `scala_version` in `gradle.properties` from the latest KLS release, and keep the Scala compiler version aligned with the runtime bundled by that release. The downloaded player JAR already contains the runtime; the explicit Scala dependencies above provide the matching compiler and compile-time APIs while developing.
+
+Your mod should also declare KLS in its `fabric.mod.json` `depends` object with an appropriate minimum release. Fabric ignores the `+scala.*` build metadata when evaluating version ranges. See [FOR_DEVELOPER](./docs/FOR_DEVELOPER.md) for the current coordinates and compatibility details.
 
 ### Usage: `class`
 
@@ -116,6 +124,6 @@ And in `fabric.mod.json`
 
 ### unknown invokedynamic bsm: scala/runtime\*
 
-This issues caused by scala's class loading mechanism.
+This issue is caused by Scala's class loading mechanism.
 
 It won't affect almost anything. Ignore it.
