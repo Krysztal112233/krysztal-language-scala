@@ -2,7 +2,7 @@
 
 [![Modrinth 版本](https://img.shields.io/modrinth/v/Ptd0Ha1s?style=flat&logo=modrinth&labelColor=green)](https://modrinth.com/mod/Ptd0Ha1s)
 
-面向 Scala 3 的 Fabric 语言适配器。当前发布：KLS `3.6.0`，仅支持 Scala `3.9.0`。
+面向 Scala 3 的 Fabric 语言适配器。当前发布：KLS `3.7.0`，仅支持 Scala `3.9.0`。
 
 - 开发者：[FOR_DEVELOPER](./FOR_DEVELOPER.md)（英文）
 - 玩家：[FOR_USER](./FOR_USER.md)（英文）
@@ -26,7 +26,7 @@ dependencies {
 }
 ```
 
-设置 `kls_version=3.6.0` 与 `scala_version=3.9.0`，并在 `fabric.mod.json` 中声明 `"krysztal-language-scala": ">=3.6.0"`。
+设置 `kls_version=3.7.0` 与 `scala_version=3.9.0`，并在 `fabric.mod.json` 中声明 `"krysztal-language-scala": ">=3.7.0"`。
 
 ## 用法
 

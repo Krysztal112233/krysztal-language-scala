@@ -1,6 +1,6 @@
 # FOR DEVELOPER
 
-KLS `3.6.0` bundles Scala `3.9.0` only. Compile with that version and do not ship another Scala runtime.
+KLS `3.7.0` bundles Scala `3.9.0` only. Compile with that version and do not ship another Scala runtime.
 
 ```groovy
 plugins {
@@ -13,7 +13,7 @@ repositories {
 }
 
 dependencies {
-	modImplementation("maven.modrinth:krysztal-language-scala:3.6.0")
+	modImplementation("maven.modrinth:krysztal-language-scala:3.7.0")
 	implementation("org.scala-lang:scala3-library_3:3.9.0")
 	implementation("org.scala-lang:scala-library:3.9.0")
 }
@@ -22,7 +22,7 @@ dependencies {
 ```json
 {
   "depends": {
-    "krysztal-language-scala": ">=3.6.0"
+    "krysztal-language-scala": ">=3.7.0"
   }
 }
 ```

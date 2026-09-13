@@ -4,7 +4,7 @@
 
 <a href="./docs/README_zhcn.md">中文简体</a>
 
-A maintained Fabric language adapter for Scala 3. Current release: KLS `3.6.0`, Scala `3.9.0` only.
+A maintained Fabric language adapter for Scala 3. Current release: KLS `3.7.0`, Scala `3.9.0` only.
 
 - Developers: [FOR_DEVELOPER](./docs/FOR_DEVELOPER.md)
 - Players: [FOR_USER](./docs/FOR_USER.md)
@@ -28,7 +28,7 @@ dependencies {
 }
 ```
 
-Set `kls_version=3.6.0` and `scala_version=3.9.0`. Also declare `"krysztal-language-scala": ">=3.6.0"` in `fabric.mod.json`.
+Set `kls_version=3.7.0` and `scala_version=3.9.0`. Also declare `"krysztal-language-scala": ">=3.7.0"` in `fabric.mod.json`.
 
 ## Usage
 
