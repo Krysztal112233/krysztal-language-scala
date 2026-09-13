@@ -199,7 +199,7 @@ publishMods {
 	file = jar.archiveFile
 	type = STABLE
 	modLoaders.add("fabric")
-	changelog= "Bundled Scala runtime: ${scala_version}"
+	changelog = "Bundled Scala runtime: ${scala_version}\n\nThe language adapter itself is now implemented in Scala 3, with support for class entrypoints and clearer instantiation errors."
 
 	modrinth {
 		minecraftVersionRange {
