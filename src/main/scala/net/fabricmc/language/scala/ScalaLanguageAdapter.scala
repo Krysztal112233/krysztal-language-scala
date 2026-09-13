@@ -20,13 +20,10 @@ class ScalaLanguageAdapter extends LanguageAdapter {
     ): T = {
         log.debug(s"Constructing for scala mod ${mod.getMetadata.getId}.")
 
-        val module = Seq(value, value + "$").view
+        Seq(value, value + "$").view
             .flatMap(getScalaObject(_, tpe))
             .headOption
-        module match {
-            case Some(instance) => instance
-            case None           => instantiateClass(mod, value, tpe)
-        }
+            .getOrElse(instantiateClass(mod, value, tpe))
     }
 
     private def getScalaObject[T](value: String, tpe: Class[T]): Option[T] = {
@@ -35,10 +32,8 @@ class ScalaLanguageAdapter extends LanguageAdapter {
             val module = clazz.getField("MODULE$").get(null)
             Some(tpe.cast(module))
         } catch {
-            case e: ReflectiveOperationException =>
-                log.debug(s"Reflecting failed for `$value`: $e")
-                None
-            case e: ExceptionInInitializerError =>
+            case e: (ReflectiveOperationException |
+                    ExceptionInInitializerError) =>
                 log.debug(s"Reflecting failed for `$value`: $e")
                 None
             case e: ClassCastException =>
@@ -56,17 +51,10 @@ class ScalaLanguageAdapter extends LanguageAdapter {
             val clazz = Class.forName(value, true, targetClassLoader)
             tpe.cast(clazz.getDeclaredConstructor().newInstance())
         } catch {
-            case e: ReflectiveOperationException =>
-                throw new LanguageAdapterException(
-                  failureMessage(mod, value),
-                  e
-                )
-            case e: ExceptionInInitializerError =>
-                throw new LanguageAdapterException(
-                  failureMessage(mod, value),
-                  e
-                )
-            case e: ClassCastException =>
+            case e: (
+                  ReflectiveOperationException | ExceptionInInitializerError |
+                      ClassCastException
+                ) =>
                 throw new LanguageAdapterException(
                   failureMessage(mod, value),
                   e
