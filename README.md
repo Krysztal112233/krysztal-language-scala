@@ -48,6 +48,10 @@ class ExampleEntry extends ModInitializer:
 }
 ```
 
+A class is instantiated through its public no-arg constructor, so the `scala`
+adapter accepts classes as well; the plain entrypoint just uses the default
+adapter.
+
 ### `object`
 
 ```scala

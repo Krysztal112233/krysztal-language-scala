@@ -25,10 +25,7 @@ class ScalaLanguageAdapter extends LanguageAdapter {
             .headOption
         module match {
             case Some(instance) => instance
-            case None =>
-                throw new LanguageAdapterException(
-                  s"Unable to instantiate mod ${mod.getMetadata.getId}."
-                )
+            case None           => instantiateClass(mod, value, tpe)
         }
     }
 
@@ -44,8 +41,42 @@ class ScalaLanguageAdapter extends LanguageAdapter {
             case e: ExceptionInInitializerError =>
                 log.debug(s"Reflecting failed for `$value`: $e")
                 None
+            case e: ClassCastException =>
+                log.warn(s"`$value` is not assignable to ${tpe.getName}: $e")
+                None
         }
     }
+
+    private def instantiateClass[T](
+        mod: ModContainer,
+        value: String,
+        tpe: Class[T]
+    ): T = {
+        try {
+            val clazz = Class.forName(value, true, targetClassLoader)
+            tpe.cast(clazz.getDeclaredConstructor().newInstance())
+        } catch {
+            case e: ReflectiveOperationException =>
+                throw new LanguageAdapterException(
+                  failureMessage(mod, value),
+                  e
+                )
+            case e: ExceptionInInitializerError =>
+                throw new LanguageAdapterException(
+                  failureMessage(mod, value),
+                  e
+                )
+            case e: ClassCastException =>
+                throw new LanguageAdapterException(
+                  failureMessage(mod, value),
+                  e
+                )
+        }
+    }
+
+    private def failureMessage(mod: ModContainer, value: String): String =
+        s"Unable to instantiate mod ${mod.getMetadata.getId} from `$value`: " +
+            "neither a Scala object (MODULE$) nor a class with a public no-arg constructor"
 
     private def targetClassLoader: ClassLoader =
         FabricLauncherBase.getLauncher.getTargetClassLoader
