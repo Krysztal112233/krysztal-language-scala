@@ -24,9 +24,6 @@ System.out.println("Building with Scala 3: ${scala_version}")
 dependencies {
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
 
-	compileOnly 'org.projectlombok:lombok:1.18.46'
-	annotationProcessor 'org.projectlombok:lombok:1.18.46'
-
 	implementation "net.fabricmc:fabric-loader:${project.loader_version}"
 	testImplementation 'org.junit.jupiter:junit-jupiter:5.11.4'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher:1.11.4'
@@ -229,4 +226,26 @@ publishMods {
 	// 		end = "latest"
 	// 	}
 	// }
+}
+
+// Loom 1.17 does not expose the main source set's classes directories to the
+// dev runtime on its own: without an explicit mods entry no fabric.classPathGroups
+// system property is emitted, so the game classloader rejects every class that
+// lives outside build/resources/main (e.g. the Scala language adapter).
+loom {
+	mods {
+		"krysztal-language-scala" {
+			sourceSet sourceSets.main
+		}
+	}
+}
+
+// Language adapters are instantiated during loader freeze(), before
+// unlockClassPath() exposes plain runtime dependency jars. The bundled Scala
+// runtime must therefore join the mod's dev classpath group explicitly,
+// mirroring the production layout where it is loaded as a nested jar of the mod.
+loom.mods.named("krysztal-language-scala") {
+	modFiles.from configurations.runtimeClasspath.elements.map { files ->
+		files.findAll { it.asFile.name.matches(/scala(3-library_3|-library)-.*\.jar/) }
+	}
 }
