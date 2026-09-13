@@ -12,7 +12,7 @@ base {
 }
 
 group = "io.github.krysztal112233"
-version = "${mod_version}+scala.${scala_version}"
+version = "${mod_version}"
 
 def distributionGroup = group.toString()
 def distributionArtifactId = archives_base_name.toString()
